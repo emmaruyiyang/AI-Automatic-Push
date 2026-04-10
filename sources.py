@@ -6,10 +6,7 @@ RSS_SOURCES = [
     {"name": "36氪",       "url": "https://36kr.com/feed",                    "lang": "zh", "category": "biz"},
     {"name": "钛媒体",     "url": "https://www.tmtpost.com/feed",             "lang": "zh", "category": "biz"},
 
-    # [tech] GitHub Trending（第三方 RSS）- 这个会输出太多
-    # {"name": "GitHub Trending All",        "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml",        "lang": "en", "category": "model"},
-    # {"name": "GitHub Trending Python",     "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/python.xml",     "lang": "en", "category": "model"},
-    # {"name": "GitHub Trending TypeScript", "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/typescript.xml", "lang": "en", "category": "model"},
+
 
     # [tech] 教育
     {"name": "fast.ai",               "url": "https://www.fast.ai/index.xml",        "lang": "en", "category": "tech"},
@@ -36,18 +33,6 @@ RSS_SOURCES = [
     {"name": "Meta AI Blog",     "url": "https://ai.meta.com/blog/rss/",          "lang": "en", "category": "model"},
     {"name": "xAI Blog",         "url": "https://x.ai/blog/rss.xml",              "lang": "en", "category": "model"},
     {"name": "Mistral Blog",     "url": "https://mistral.ai/news/rss",            "lang": "en", "category": "model"},
-
-    # [research] arXiv（AI子领域）
-    {"name": "arXiv cs.AI",   "url": "https://rss.arxiv.org/rss/cs.AI",      "lang": "en", "category": "research"},
-    {"name": "arXiv cs.LG",   "url": "https://rss.arxiv.org/rss/cs.LG",      "lang": "en", "category": "research"},
-    {"name": "arXiv cs.CV",   "url": "https://rss.arxiv.org/rss/cs.CV",      "lang": "en", "category": "research"},
-    {"name": "arXiv cs.GR",   "url": "https://rss.arxiv.org/rss/cs.GR",      "lang": "en", "category": "research"},  # 图形学/3D生成
-
-    # [research] 国际顶会博客（CVPR、ICCV、ACL 无 RSS） - 但是一般是call for paper这种
-    # {"name": "NeurIPS Blog",  "url": "https://blog.neurips.cc/feed/",         "lang": "en", "category": "research"},
-    # {"name": "ICML Blog",     "url": "https://blog.icml.cc/feed/",            "lang": "en", "category": "research"},
-    # {"name": "ICLR Blog",     "url": "https://blog.iclr.cc/feed/",            "lang": "en", "category": "research"},
-    # {"name": "AAAI Blog",     "url": "https://blog.aaai.org/feed/",           "lang": "en", "category": "research"},
     
     # [research] 研究机构 - RSS较少，先放几个代表性的，后续可以补充
     {"name": "OpenAI Research",        "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_openai_research.xml",      "lang": "en", "category": "research"},
@@ -96,6 +81,24 @@ RSS_SOURCES = [
     {"name": "硅谷101",              "url": "https://feeds.fireside.fm/sv101/rss",         "lang": "zh", "category": "opinion"},
     {"name": "科技早知道",            "url": "https://feeds.fireside.fm/guiguzaozhidao/rss","lang": "zh", "category": "opinion"},
 
+    # [research] arXiv（AI子领域）
+    # {"name": "arXiv cs.AI",   "url": "https://rss.arxiv.org/rss/cs.AI",      "lang": "en", "category": "research"},
+    # {"name": "arXiv cs.LG",   "url": "https://rss.arxiv.org/rss/cs.LG",      "lang": "en", "category": "research"},
+    # {"name": "arXiv cs.CV",   "url": "https://rss.arxiv.org/rss/cs.CV",      "lang": "en", "category": "research"},
+    # {"name": "arXiv cs.GR",   "url": "https://rss.arxiv.org/rss/cs.GR",      "lang": "en", "category": "research"},  # 图形学/3D生成
+
+    # [research] 国际顶会博客（CVPR、ICCV、ACL 无 RSS） 
+    # {"name": "NeurIPS Blog",  "url": "https://blog.neurips.cc/feed/",         "lang": "en", "category": "research"},
+    # {"name": "ICML Blog",     "url": "https://blog.icml.cc/feed/",            "lang": "en", "category": "research"},
+    # {"name": "ICLR Blog",     "url": "https://blog.iclr.cc/feed/",            "lang": "en", "category": "research"},
+    # {"name": "AAAI Blog",     "url": "https://blog.aaai.org/feed/",           "lang": "en", "category": "research"},
+    
+    # [tech] GitHub Trending（第三方 RSS）- 这个会输出太多
+    # {"name": "GitHub Trending All",        "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml",        "lang": "en", "category": "model"},
+    # {"name": "GitHub Trending Python",     "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/python.xml",     "lang": "en", "category": "model"},
+    # {"name": "GitHub Trending TypeScript", "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/typescript.xml", "lang": "en", "category": "model"},
+
+
 # Lex Fridman	只有标题 + 1-2句描述，无文字稿	
 # Dwarkesh	有部分文字转录 in feed	
 # Lenny's	完整文章全文（6500+字 HTML）	高，这是 newsletter 不是 podcast
@@ -104,18 +107,18 @@ RSS_SOURCES = [
 
 ]
 
-SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog - 之后看看 
+SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog; 时间窗口无法确认
     # [model] 无 RSS
-    # {"name": "DeepSeek Blog",     "url": "https://www.deepseek.com/news",          "category": "model"},
+    # {"name": "DeepSeek Blog",     "url": "https://www.deepseek.com/news",          "category": "model"}, # 这个很关键，没有
     {"name": "阶跃星辰",          "url": "https://www.stepfun.com/news",           "category": "model"},
     {"name": "智谱AI Blog",       "url": "https://www.zhipuai.cn/news",            "category": "model"},
     {"name": "MiniMax Blog",      "url": "https://www.minimaxi.com/news",          "category": "model"},
     {"name": "Moonshot Kimi",     "url": "https://www.moonshot.cn/news",           "category": "model"},
     # {"name": "Hunyuan",           "url": "https://hunyuan.tencent.com/blog",       "category": "model"},  # 产品主页，无文章列表
-    # {"name": "Tencent AI",        "url": "https://ai.tencent.com/ailab/zh/news",   "category": "model"},  # 404
+    # {"name": "Tencent AI",        "url": "https://ai.tencent.com/ailab/zh/news",   "category": "model"},  # delete
     {"name": "Qwen Blog",         "url": "https://qwenlm.github.io/blog",          "category": "model"},
     {"name": "Seed ByteDance",    "url": "https://seed.bytedance.com/en/blog",     "category": "model"},
-    # {"name": "快手技术",          "url": "https://www.kuaishou.com/about/news",    "category": "model"},  # 404
+    # {"name": "快手技术",          "url": "https://www.kuaishou.com/about/news",    "category": "model"},  # delete
     {"name": "Black Forest Labs", "url": "https://bfl.ai/blog",                    "category": "model"},
 
     # [creative] 创意 AI 工具（无 RSS）
@@ -132,7 +135,6 @@ SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog - 之后看看
     {"name": "Suno Blog",         "url": "https://suno.com/blog",                  "category": "creative"},
     {"name": "Meshy Blog",        "url": "https://www.meshy.ai/blog",              "category": "creative"},
     # {"name": "Dreamina",          "url": "https://dreamina.capcut.com",            "category": "creative"},  # 产品主页
-    # {"name": "Rodin",             "url": "https://hyperhuman.deemos.com/rodin",    "category": "creative"},  # 产品主页
     {"name": "Tripo",             "url": "https://www.tripo3d.ai/blog",            "category": "creative"},
     {"name": "OpenArt",           "url": "https://openart.ai/blog",                "category": "creative"},
     # {"name": "Medeo",             "url": "https://www.medeo.app",                  "category": "creative"},  # 产品主页
@@ -148,7 +150,6 @@ SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog - 之后看看
 
     # [social]
     {"name": "Character.AI Blog", "url": "https://blog.character.ai",              "category": "social"},
-    # {"name": "Replika Blog",      "url": "https://replika.com/blog",               "category": "social"},  # 404
     {"name": "Talkie",            "url": "https://www.talkie-ai.com/blog",         "category": "social"},
     # {"name": "星野",              "url": "https://www.xingyeai.com",               "category": "social"},
     # {"name": "猫箱",              "url": "https://maoxiangai.com/industry-news.html", "category": "social"}, # 好像也不大对
@@ -158,6 +159,7 @@ SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog - 之后看看
     # {"name": "无限谷",            "url": "https://www.infinityvalley.com",         "category": "social"},
     # {"name": "松果时刻",          "url": "https://www. songguoshike.com",            "category": "social"},
     # Loopit 仅有 App Store 页面，无法 爬取
+    # 发新
 
     # [opinion] 核心人物博客（无 RSS）
     {"name": "Karpathy Blog",     "url": "https://karpathy.ai",                    "category": "opinion"},
@@ -179,3 +181,13 @@ TWITTER_ACCOUNTS = {
     "ShunyuYao12":    "Shunyu Yao",
     "tydsh":        "Yuandong Tian",
 }
+
+
+WECHAT_ACCOUNTS = [
+语言即世界https://mp.weixin.qq.com/s?__biz=MzE5ODg1MTY4Mw==&mid=2247484867&idx=1&sn=95548c75fb51e6c0bb8f6a7296b625d2&chksm=97cae43b7155514134b48a4e5f8b122c2292a7528b24fb5700e21f5f4bf735071af6036533eb&scene=126&sessionid=1775789575&subscene=227&clicktime=1775789577&enterid=1775789577#rd
+海外独角兽 Mzg2OTY0MDk0NQ==
+]
+
+
+# 加一个建议的表单
+# 添加微信公众号的信息来源

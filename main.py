@@ -30,7 +30,7 @@ FEISHU_WEBHOOK   = os.environ["FEISHU_WEBHOOK"]
 DB_PATH          = "newsletter.db"
 LOOKBACK_HOURS   = 12          # 抓取过去多少小时的内容
 PUSH_HOURS       = [9, 21]     # 每天推送时间（24小时制），可添加多个
-MAX_PER_SECTION = 5  # 每板块最多渲染条数（控制飞书卡片30KB限制）
+MAX_PER_SECTION = 10  # 每板块最多渲染条数（控制飞书卡片30KB限制）
 
 os.makedirs("logs", exist_ok=True)
 _log_file = os.path.join("logs", datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".log")
@@ -313,15 +313,15 @@ def collect_all(conn: sqlite3.Connection) -> list[dict]:
         log.info(f"  {src['name']}: {len(new_items)}条新内容 (窗口内{raw}条, 过滤后{len(fetched)}条)")
         time.sleep(0.5)
 
-    log.info("开始抓取博客页面...")
-    for src in SCRAPE_SOURCES:
-        fetched, raw = fetch_webpage(src, since=since)
-        new_items = [i for i in fetched if not is_seen(conn, i["url"])]
-        all_items.extend(new_items)
-        total_raw += raw
-        total_filtered += len(fetched)
-        log.info(f"  {src['name']}: {len(new_items)}条新内容 (抓取{raw}条, 过滤后{len(fetched)}条)")
-        time.sleep(0.5)
+    # log.info("开始抓取博客页面...") # 暂时停用
+    # for src in SCRAPE_SOURCES:
+    #     fetched, raw = fetch_webpage(src, since=since)
+    #     new_items = [i for i in fetched if not is_seen(conn, i["url"])]
+    #     all_items.extend(new_items)
+    #     total_raw += raw
+    #     total_filtered += len(fetched)
+    #     log.info(f"  {src['name']}: {len(new_items)}条新内容 (抓取{raw}条, 过滤后{len(fetched)}条)")
+    #     time.sleep(0.5)
 
     log.info("开始抓取Twitter...")
     twitter_items = [i for i in fetch_twitter(since) if not is_seen(conn, i["url"])]
@@ -419,10 +419,12 @@ def ai_summarize(items: list[dict]) -> dict:
                 messages=[{"role": "user", "content": prompt}]
             )
             text = msg.content[0].text
-            if "```" in text:
-                text = "\n".join(l for l in text.splitlines() if not l.strip().startswith("```"))
-            start, end = text.find("["), text.rfind("]") + 1
-            result = json.loads(text[start:end])
+            log.info(f"  LLM原始返回:\n{text}")
+            import re as _re
+            m = _re.search(r'\[.*\]', text, _re.DOTALL)
+            if not m:
+                raise ValueError("LLM返回中未找到JSON数组")
+            result = json.loads(m.group(0))
             log.info(f"  LLM: 输入{len(sec_items)}条 → 输出{len(result)}条")
             return result
         except Exception as e:
@@ -532,7 +534,7 @@ def build_feishu_card(sections: dict, date_str: str) -> dict:
             "header": {
                 "title": {
                     "tag": "plain_text",
-                    "content": f"🗞 AI日报 · {date_str}"
+                    "content": f"🗞 AI日报 · 前12小时"
                 },
                 "template": "blue"
             },

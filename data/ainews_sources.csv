@@ -1,0 +1,130 @@
+type,name,url,lang,category,active,note
+RSS,机器之心,https://www.jiqizhixin.com/rss,zh,tech,yes,
+RSS,量子位,https://www.qbitai.com/feed,zh,tech,yes,
+RSS,新智元,https://www.xinzhi.com/rss,zh,tech,yes,
+RSS,36氪,https://36kr.com/feed,zh,biz,yes,
+RSS,钛媒体,https://www.tmtpost.com/feed,zh,biz,yes,
+RSS,fast.ai,https://www.fast.ai/index.xml,en,tech,yes,
+RSS,Towards Data Science,https://towardsdatascience.com/feed,en,tech,yes,
+RSS,TechCrunch,https://techcrunch.com/feed/,en,biz,yes,
+RSS,TechCrunch Venture,https://techcrunch.com/category/venture/feed/,en,funding,yes,
+RSS,VentureBeat,https://venturebeat.com/feed/,en,tech,yes,
+RSS,Wired AI,https://www.wired.com/feed/tag/artificial-intelligence/rss,en,tech,yes,
+RSS,Ars Technica AI,https://feeds.arstechnica.com/arstechnica/index,en,tech,yes,
+RSS,The Information,https://www.theinformation.com/feed,en,biz,yes,
+RSS,Inc.com,https://www.inc.com/rss,en,biz,yes,
+RSS,Entrepreneur,https://www.entrepreneur.com/latest.rss,en,biz,yes,
+RSS,Fortune,https://fortune.com/feed/,en,biz,yes,
+RSS,OpenAI Blog,https://openai.com/news/rss.xml,en,model,yes,
+RSS,Google DeepMind,https://deepmind.google/blog/rss.xml,en,model,yes,
+RSS,Anthropic Blog,https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml,en,model,yes,
+RSS,Microsoft AI,https://blogs.microsoft.com/ai/feed/,en,model,yes,
+RSS,Hugging Face,https://huggingface.co/blog/feed.xml,en,model,yes,
+RSS,Google AI Blog,https://blog.google/technology/ai/rss/,en,model,yes,
+RSS,Meta AI Blog,https://ai.meta.com/blog/rss/,en,model,yes,
+RSS,xAI Blog,https://x.ai/blog/rss.xml,en,model,yes,
+RSS,Mistral Blog,https://mistral.ai/news/rss,en,model,yes,
+RSS,OpenAI Research,https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_openai_research.xml,en,research,yes,
+RSS,Anthropic Research,https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_research.xml,en,research,yes,
+RSS,Thinking Machines Lab,https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_thinkingmachines.xml,en,research,yes,
+RSS,YC Blog,https://www.ycombinator.com/blog/rss,en,funding,yes,
+RSS,a16z Blog,https://a16z.com/feed/,en,funding,yes,
+RSS,Sequoia Blog,https://www.sequoiacap.com/blog/rss.xml,en,funding,yes,
+RSS,Crunchbase News,https://news.crunchbase.com/feed/,en,funding,yes,
+RSS,Reuters Tech,https://feeds.reuters.com/reuters/technologyNews,en,public_market,yes,
+RSS,Bloomberg Tech,https://feeds.bloomberg.com/technology/news.rss,en,public_market,yes,
+RSS,Seeking Alpha AI,https://seekingalpha.com/tag/artificial-intelligence.xml,en,public_market,yes,
+RSS,Adobe Blog,https://blog.adobe.com/en/feed,en,creative,yes,
+RSS,Figma Blog,https://www.figma.com/blog/rss/,en,creative,yes,
+RSS,Canva Newsroom,https://www.canva.com/newsroom/rss.xml,en,creative,yes,
+RSS,Midjourney Blog,https://midjourney.com/blog/rss,en,creative,yes,
+RSS,Runway Blog,https://runwayml.com/blog/rss,en,creative,yes,
+RSS,Luma AI Blog,https://lumalabs.ai/blog/rss,en,creative,yes,
+RSS,Stability AI,https://stability.ai/blog?format=rss,en,creative,yes,
+RSS,Crepal,https://crepal.ai/blog/feed/,en,creative,yes,
+RSS,Simon Willison,https://simonwillison.net/atom/entries/,en,opinion,yes,
+RSS,Lilian Weng,https://lilianweng.github.io/index.xml,en,opinion,yes,
+RSS,Greg Brockman,https://blog.gregbrockman.com/feed,en,opinion,yes,
+RSS,Wojciech Zaremba,https://medium.com/@woj.zaremba/feed,en,opinion,yes,
+RSS,Stefan Pieterse,https://steipete.me/rss.xml,en,opinion,yes,
+RSS,Sam Altman Blog,http://blog.samaltman.com/posts.atom,en,opinion,yes,
+RSS,HN Buzzing,https://hn.buzzing.cc/feed.xml,zh,opinion,yes,
+RSS,AI Hub Today,https://ai.hubtoday.app/blog/index.xml,zh,opinion,yes,
+RSS,Lex Fridman Podcast,https://lexfridman.com/feed/podcast/,en,opinion,yes,只有标题+1-2句描述无文字稿
+RSS,Dwarkesh Podcast,https://www.dwarkeshpatel.com/feed,en,opinion,yes,有部分文字转录
+RSS,Lenny's Podcast,https://www.lennysnewsletter.com/feed,en,opinion,yes,完整文章全文newsletter非podcast
+RSS,Latent Space Podcast,https://www.latent.space/feed,en,opinion,yes,完整文章全文AINews日报
+RSS,NVIDIA AI Podcast,https://feeds.megaphone.fm/nvidiaaipodcast,en,opinion,yes,
+RSS,TWIML AI Podcast,https://feeds.megaphone.fm/MLN2155636147,en,opinion,yes,
+RSS,Cognitive Revolution,https://feeds.megaphone.fm/RINTP3108857801,en,opinion,yes,
+RSS,硅谷101,https://feeds.fireside.fm/sv101/rss,zh,opinion,yes,
+RSS,科技早知道,https://feeds.fireside.fm/guiguzaozhidao/rss,zh,opinion,yes,
+RSS,arXiv cs.AI,https://rss.arxiv.org/rss/cs.AI,en,research,no,输出量大
+RSS,arXiv cs.LG,https://rss.arxiv.org/rss/cs.LG,en,research,no,输出量大
+RSS,arXiv cs.CV,https://rss.arxiv.org/rss/cs.CV,en,research,no,输出量大
+RSS,arXiv cs.GR,https://rss.arxiv.org/rss/cs.GR,en,research,no,图形学/3D生成
+RSS,NeurIPS Blog,https://blog.neurips.cc/feed/,en,research,no,
+RSS,ICML Blog,https://blog.icml.cc/feed/,en,research,no,
+RSS,ICLR Blog,https://blog.iclr.cc/feed/,en,research,no,
+RSS,AAAI Blog,https://blog.aaai.org/feed/,en,research,no,
+RSS,GitHub Trending All,https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml,en,model,no,输出太多
+RSS,GitHub Trending Python,https://mshibanami.github.io/GitHubTrendingRSS/daily/python.xml,en,model,no,输出太多
+RSS,GitHub Trending TypeScript,https://mshibanami.github.io/GitHubTrendingRSS/daily/typescript.xml,en,model,no,输出太多
+SCRAPE,阶跃星辰,https://www.stepfun.com/news,,model,yes,
+SCRAPE,智谱AI Blog,https://www.zhipuai.cn/news,,model,yes,
+SCRAPE,MiniMax Blog,https://www.minimaxi.com/news,,model,yes,
+SCRAPE,Moonshot Kimi,https://www.moonshot.cn/news,,model,yes,
+SCRAPE,Qwen Blog,https://qwenlm.github.io/blog,,model,yes,
+SCRAPE,Seed ByteDance,https://seed.bytedance.com/en/blog,,model,yes,
+SCRAPE,Black Forest Labs,https://bfl.ai/blog,,model,yes,
+SCRAPE,DeepSeek Blog,https://www.deepseek.com/news,,model,no,无RSS
+SCRAPE,Hunyuan,https://hunyuan.tencent.com/blog,,model,no,产品主页无文章列表
+SCRAPE,Tencent AI,https://ai.tencent.com/ailab/zh/news,,model,no,
+SCRAPE,快手技术,https://www.kuaishou.com/about/news,,model,no,
+SCRAPE,可灵 Kling,https://app.klingai.com/cn/news,,creative,yes,
+SCRAPE,PixVerse,https://pixverse.ai/en/blog,,creative,yes,
+SCRAPE,Higgsfield,https://higgsfield.ai/blog,,creative,yes,
+SCRAPE,Krea,https://www.krea.ai/blog,,creative,yes,
+SCRAPE,Recraft,https://www.recraft.ai/blog,,creative,yes,
+SCRAPE,Fal.ai Blog,https://blog.fal.ai,,creative,yes,
+SCRAPE,Pika Blog,https://pika.art/blog,,creative,yes,
+SCRAPE,Suno Blog,https://suno.com/blog,,creative,yes,
+SCRAPE,Meshy Blog,https://www.meshy.ai/blog,,creative,yes,
+SCRAPE,Tripo,https://www.tripo3d.ai/blog,,creative,yes,
+SCRAPE,OpenArt,https://openart.ai/blog,,creative,yes,
+SCRAPE,Vidmuse,https://vidmuse.ai/blog,,creative,yes,
+SCRAPE,Manus,https://manus.im/blog,,creative,yes,
+SCRAPE,HeyGen Blog,https://www.heygen.com/blog,,creative,no,JS渲染无静态内容
+SCRAPE,ElevenLabs Blog,https://elevenlabs.io/blog,,creative,no,JS渲染无静态内容
+SCRAPE,Ideogram Blog,https://ideogram.ai/blog,,creative,no,403
+SCRAPE,Dreamina,https://dreamina.capcut.com,,creative,no,产品主页
+SCRAPE,Medeo,https://www.medeo.app,,creative,no,产品主页
+SCRAPE,Flova,https://www.flova.ai,,creative,no,产品主页
+SCRAPE,oiioii,https://www.oiioii.ai,,creative,no,产品主页
+SCRAPE,tapnow,https://www.tapnow.ai,,creative,no,产品主页
+SCRAPE,Genspark,https://www.genspark.ai/blog,,creative,no,403
+SCRAPE,剪映,https://www.jianying.com/news,,creative,no,重定向到主页
+SCRAPE,美图,https://www.meitu.com/news,,creative,no,无文章列表
+SCRAPE,即梦,https://jimeng.jianying.com,,creative,no,
+SCRAPE,Character.AI Blog,https://blog.character.ai,,social,yes,
+SCRAPE,Talkie,https://www.talkie-ai.com/blog,,social,yes,
+SCRAPE,星野,https://www.xingyeai.com,,social,no,
+SCRAPE,猫箱,https://maoxiangai.com/industry-news.html,,social,no,
+SCRAPE,Elys AI,https://www.elys.live,,social,no,
+SCRAPE,WayShot,https://www.wayshot.ai,,social,no,
+SCRAPE,Anuttacon,https://www.anuttacon.com,,social,no,
+SCRAPE,无限谷,https://www.infinityvalley.com,,social,no,
+SCRAPE,松果时刻,https://www.songguoshike.com,,social,no,
+SCRAPE,Karpathy Blog,https://karpathy.ai,,opinion,yes,
+SCRAPE,Dario Amodei Blog,https://www.darioamodei.com,,opinion,yes,
+SCRAPE,Colah Blog,https://colah.github.io,,opinion,yes,
+SCRAPE,Francois Chollet,https://fchollet.com,,opinion,yes,
+SCRAPE,Mustafa Suleyman,https://mustafa-suleyman.ai,,opinion,yes,
+SCRAPE,Karina Nguyen,https://karinanguyen.com,,opinion,yes,
+SCRAPE,Founder Park,https://founderpark.net,,opinion,yes,
+TWITTER,Sam Altman,https://x.com/sama,,opinion,yes,
+TWITTER,Elon Musk,https://x.com/elonmusk,,opinion,yes,
+TWITTER,Dario Amodei,https://x.com/DarioAmodei,,opinion,yes,
+TWITTER,Karpathy,https://x.com/karpathy,,opinion,yes,
+TWITTER,Shunyu Yao,https://x.com/ShunyuYao12,,opinion,yes,
+TWITTER,Yuandong Tian,https://x.com/tydsh,,opinion,yes,
