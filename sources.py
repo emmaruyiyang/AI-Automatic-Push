@@ -184,8 +184,8 @@ TWITTER_ACCOUNTS = {
 
 
 WECHAT_ACCOUNTS = [
-语言即世界https://mp.weixin.qq.com/s?__biz=MzE5ODg1MTY4Mw==&mid=2247484867&idx=1&sn=95548c75fb51e6c0bb8f6a7296b625d2&chksm=97cae43b7155514134b48a4e5f8b122c2292a7528b24fb5700e21f5f4bf735071af6036533eb&scene=126&sessionid=1775789575&subscene=227&clicktime=1775789577&enterid=1775789577#rd
-海外独角兽 Mzg2OTY0MDk0NQ==
+    {"name": "海外独角兽", "biz": "Mzg2OTY0MDk0NQ=="},
+    {"name": "语言即世界", "biz": "MzE5ODg1MTY4Mw=="},
 ]
 
 
