@@ -1,10 +1,14 @@
 import requests
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 from utils import fetch_stock_data
+
+load_dotenv()
 
 BITABLE_APP_TOKEN = "ZaJGbWgnkaTzchsPwp2clTTlnKb"
 BITABLE_TABLE_ID  = "tblCykxhEyIGJwPR"
+
 
 
 def get_token(app_id: str, app_secret: str) -> str:
@@ -40,24 +44,24 @@ def run():
         return
 
     token = get_token(app_id, app_secret)
-    date_str = datetime.utcnow().strftime("%Y-%m-%d")
+    date_ms = int(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000)  # unix时间戳形式
 
     records = []
     for r in rows:
         records.append({
-            "日期":          date_str,
+            "日期":          date_ms,
             "公司":          f"{r['name']} ({r['ticker']})",
-            "股价":          r["price"],
-            "涨跌幅":        r["chg_str"],
+            "股价":          r["price_raw"],
+            "涨跌幅":        r["chg_pct"],
             "市值":          r["mktcap"],
-            "PE (TTM)":      r["pe_ttm"],
-            "PE (2026E)":    r["pe_fwd"],
-            "EV/Rev (TTM)":  r["ev_rev_ttm"],
-            "EV/Rev (2026E)":r["ev_rev_fwd"],
+            "PE (TTM)":      r["pe_ttm_raw"],
+            "PE (2026E)":    r["pe_fwd_raw"],
+            "EV/Rev (TTM)":  r["ev_rev_ttm_raw"],
+            "EV/Rev (2026E)":r["ev_rev_fwd_raw"],
             "收入 (LTM)":    r["revenue"],
-            "收入同比":      r["rev_yoy"],
-            "毛利率":        r["gross_margin"],
-            "净利率":        r["net_margin"],
+            "收入同比":      r["rev_yoy_raw"],
+            "毛利率":        r["gross_margin_raw"],
+            "净利率":        r["net_margin_raw"],
         })
 
     insert_records(token, records)

@@ -139,35 +139,49 @@ def fetch_stock_data() -> list[dict]:
                 "name":           s["name"],
                 "ticker":         s["ticker"],
                 "currency":       currency,
-                # Price
+                # Price (formatted for card, raw for bitable)
                 "price":          f"{price:,.2f}",
+                "price_raw":      price,
                 "chg_pct":        chg_pct,
                 "chg_str":        f"{'▲' if chg_pct>=0 else '▼'} {abs(chg_pct)*100:.2f}%",
                 "chg_up":         chg_pct >= 0,
                 "mktcap":         _fmt_num(mktcap, currency),
-                # Valuation TTM
+                "mktcap_raw":     mktcap,
+                # Valuation TTM (raw numbers)
                 "pe_ttm":         _ratio(pe_ttm),
+                "pe_ttm_raw":     pe_ttm,
                 "ev_rev_ttm":     _ratio(ev_rev_ttm),
+                "ev_rev_ttm_raw": ev_rev_ttm,
                 "ev_ebitda_ttm":  _ratio(ev_ebitda_ttm),
                 # Valuation 2026E
                 "pe_fwd":         _ratio(pe_fwd),
+                "pe_fwd_raw":     pe_fwd,
                 "ev_rev_fwd":     _ratio(ev_rev_fwd),
-                "ev_ebitda_fwd":  _ratio(ev_ebitda_fwd),  # — for now
-                # Financials
+                "ev_rev_fwd_raw": ev_rev_fwd,
+                "ev_ebitda_fwd":  _ratio(ev_ebitda_fwd),
+                # Financials (formatted for card, raw for bitable)
                 "revenue":        _fmt_num(rev_cur, currency),
+                "revenue_raw":    rev_cur,
                 "rev_yoy":        _arrow(rev_yoy),
+                "rev_yoy_raw":    rev_yoy,
                 "net_income":     _fmt_num(ni_cur, currency),
+                "net_income_raw": ni_cur,
                 "ni_yoy":         _arrow(ni_yoy),
+                "ni_yoy_raw":     ni_yoy,
                 "gross_margin":   _pct(gross_margin),
+                "gross_margin_raw": gross_margin,
                 "net_margin":     _pct(net_margin),
+                "net_margin_raw": net_margin,
                 "rnd_pct":        _pct(rnd_pct),
                 "capex_pct":      _pct(capex_pct),
                 "roe":            _pct(roe),
                 "roa":            _pct(roa),
                 "op_cf_rev":      _pct(op_cf_pct),
-                # Guidance (analyst estimates)
+                # Guidance
                 "fwd_rev":        _fmt_num(fwd_rev_est, currency),
+                "fwd_rev_raw":    fwd_rev_est,
                 "fwd_ni":         _fmt_num(fwd_ni_est, currency),
+                "fwd_ni_raw":     fwd_ni_est,
             })
         except Exception as e:
             log.warning(f"Stock fetch failed {s['ticker']}: {e}")
@@ -208,23 +222,3 @@ TABLE_B_COLS = [
 ]
 
 
-def build_stock_elements(rows: list[dict]) -> list[dict]:
-    if not rows:
-        return []
-
-    elements = [
-        {"tag": "div", "text": {"tag": "lark_md", "content": "**📈 二级市场行情**"}},
-        {"tag": "hr"},
-        {"tag": "div", "text": {"tag": "lark_md", "content": "*估值*"}},
-    ]
-    for r in rows:
-        valuation = "  |  ".join(
-            f"{disp}: {r.get(key, '—')}" for key, disp in TABLE_A_COLS if key != "name"
-        )
-        fundamentals = "  |  ".join(
-            f"{disp}: {r.get(key, '—')}" for key, disp in TABLE_B_COLS if key != "name"
-        )
-        elements.append({"tag": "div", "text": {"tag": "lark_md",
-            "content": f"**{r['name']} ({r['ticker']})**\n{valuation}\n{fundamentals}"}})
-    elements.append({"tag": "div", "text": {"tag": "lark_md", "content": " "}})
-    return elements

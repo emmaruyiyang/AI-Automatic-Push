@@ -1,3 +1,0 @@
-{
-  "rewrites": [{ "source": "/stock", "destination": "/api/stock" }]
-}

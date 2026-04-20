@@ -46,9 +46,9 @@ RSS_SOURCES = [
     {"name": "Crunchbase News","url": "https://news.crunchbase.com/feed/",       "lang": "en", "category": "funding"},
 
     # [public_market] 二级市场财经
-    {"name": "Reuters Tech",    "url": "https://feeds.reuters.com/reuters/technologyNews",                   "lang": "en", "category": "public_market"},
-    {"name": "Bloomberg Tech",  "url": "https://feeds.bloomberg.com/technology/news.rss",                   "lang": "en", "category": "public_market"},
-    {"name": "Seeking Alpha AI","url": "https://seekingalpha.com/tag/artificial-intelligence.xml",          "lang": "en", "category": "public_market"},
+    # {"name": "Reuters Tech",    "url": "https://feeds.reuters.com/reuters/technologyNews",                   "lang": "en", "category": "public_market"},
+    # {"name": "Bloomberg Tech",  "url": "https://feeds.bloomberg.com/technology/news.rss",                   "lang": "en", "category": "public_market"},
+    # {"name": "Seeking Alpha AI","url": "https://seekingalpha.com/tag/artificial-intelligence.xml",          "lang": "en", "category": "public_market"},
 
     # [creative] 创意设计工具官方博客
     {"name": "Adobe Blog",     "url": "https://blog.adobe.com/en/feed",         "lang": "en", "category": "creative"},
@@ -110,19 +110,18 @@ RSS_SOURCES = [
 SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog; 时间窗口无法确认
     # [model] 无 RSS
     # {"name": "DeepSeek Blog",     "url": "https://www.deepseek.com/news",          "category": "model"}, # 这个很关键，没有
-    {"name": "阶跃星辰",          "url": "https://www.stepfun.com/news",           "category": "model"},
-    {"name": "智谱AI Blog",       "url": "https://www.zhipuai.cn/news",            "category": "model"},
-    {"name": "MiniMax Blog",      "url": "https://www.minimaxi.com/news",          "category": "model"},
+    # {"name": "阶跃星辰",          "url": "https://www.stepfun.com/news",           "category": "model"},
+    # {"name": "智谱AI Blog",       "url": "https://www.zhipuai.cn/news",            "category": "model"},  # 时间暂时识别不到
+    # {"name": "MiniMax Blog",      "url": "https://www.minimaxi.com/news",          "category": "model"},    # 时间暂时识别不到
     {"name": "Moonshot Kimi",     "url": "https://www.moonshot.cn/news",           "category": "model"},
     # {"name": "Hunyuan",           "url": "https://hunyuan.tencent.com/blog",       "category": "model"},  # 产品主页，无文章列表
-    # {"name": "Tencent AI",        "url": "https://ai.tencent.com/ailab/zh/news",   "category": "model"},  # delete
-    {"name": "Qwen Blog",         "url": "https://qwenlm.github.io/blog",          "category": "model"},
+    # {"name": "Qwen Blog",         "url": "https://qwen.ai/research",          "category": "model"}, # js渲染 - 后续可以添加
     {"name": "Seed ByteDance",    "url": "https://seed.bytedance.com/en/blog",     "category": "model"},
     # {"name": "快手技术",          "url": "https://www.kuaishou.com/about/news",    "category": "model"},  # delete
     {"name": "Black Forest Labs", "url": "https://bfl.ai/blog",                    "category": "model"},
 
     # [creative] 创意 AI 工具（无 RSS）
-    {"name": "可灵 Kling",        "url": "https://app.klingai.com/cn/news",        "category": "creative"},
+    {"name": "可灵 Kling",        "url": "https://kling.ai/blog",        "category": "creative"},
     {"name": "PixVerse",          "url": "https://pixverse.ai/en/blog",            "category": "creative"},
     {"name": "Higgsfield",        "url": "https://higgsfield.ai/blog",             "category": "creative"},
     {"name": "Krea",              "url": "https://www.krea.ai/blog",               "category": "creative"},
@@ -135,7 +134,7 @@ SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog; 时间窗口无法�
     {"name": "Suno Blog",         "url": "https://suno.com/blog",                  "category": "creative"},
     {"name": "Meshy Blog",        "url": "https://www.meshy.ai/blog",              "category": "creative"},
     # {"name": "Dreamina",          "url": "https://dreamina.capcut.com",            "category": "creative"},  # 产品主页
-    {"name": "Tripo",             "url": "https://www.tripo3d.ai/blog",            "category": "creative"},
+    # {"name": "Tripo",             "url": "https://www.tripo3d.ai/blog",            "category": "creative"},     # 时间暂时识别不到
     {"name": "OpenArt",           "url": "https://openart.ai/blog",                "category": "creative"},
     # {"name": "Medeo",             "url": "https://www.medeo.app",                  "category": "creative"},  # 产品主页
     # {"name": "Flova",             "url": "https://www.flova.ai",                   "category": "creative"},  # 产品主页
@@ -161,25 +160,25 @@ SCRAPE_SOURCES = [ # 很多产品主页，而拿不到blog; 时间窗口无法�
     # Loopit 仅有 App Store 页面，无法 爬取
     # 发新
 
-    # [opinion] 核心人物博客（无 RSS）
-    {"name": "Karpathy Blog",     "url": "https://karpathy.ai",                    "category": "opinion"},
-    {"name": "Dario Amodei Blog", "url": "https://www.darioamodei.com",            "category": "opinion"},
-    {"name": "Colah Blog",        "url": "https://colah.github.io",                "category": "opinion"},
-    {"name": "Francois Chollet",  "url": "https://fchollet.com",                   "category": "opinion"},
-    {"name": "Mustafa Suleyman",  "url": "https://mustafa-suleyman.ai",            "category": "opinion"},
-    {"name": "Karina Nguyen",     "url": "https://karinanguyen.com",               "category": "opinion"},
-    {"name": "Founder Park",      "url": "https://founderpark.net",                "category": "opinion"},# 创业社区
+    # # [opinion] 核心人物博客（无 RSS） - 找不到日期
+    # {"name": "Karpathy Blog",     "url": "https://karpathy.ai",                    "category": "opinion"},
+    # {"name": "Dario Amodei Blog", "url": "https://www.darioamodei.com",            "category": "opinion"},
+    # {"name": "Colah Blog",        "url": "https://colah.github.io",                "category": "opinion"},
+    # {"name": "Francois Chollet",  "url": "https://fchollet.com",                   "category": "opinion"},
+    # {"name": "Mustafa Suleyman",  "url": "https://mustafa-suleyman.ai",            "category": "opinion"},
+    # {"name": "Karina Nguyen",     "url": "https://karinanguyen.com",               "category": "opinion"},
+    # {"name": "Founder Park",      "url": "https://founderpark.net",                "category": "opinion"},# 创业社区
 ]
 
 
 # [opinion] (username -> display name)
 TWITTER_ACCOUNTS = {
-    "sama":        "Sam Altman",
-    "elonmusk":    "Elon Musk",
-    "DarioAmodei": "Dario Amodei",
-    "karpathy":    "Karpathy",
-    "ShunyuYao12":    "Shunyu Yao",
-    "tydsh":        "Yuandong Tian",
+    "sama":        {"name": "Twitter",    "category": "opinion"},
+    "elonmusk":    {"name": "Twitter",     "category": "opinion"},
+    "DarioAmodei": {"name": "Twitter",  "category": "opinion"},
+    "karpathy":    {"name": "Twitter",      "category": "opinion"},
+    "ShunyuYao12": {"name": "Twitter",    "category": "opinion"},
+    "tydsh":       {"name": "Twitter", "category": "opinion"},
 }
 
 
@@ -190,4 +189,3 @@ WECHAT_ACCOUNTS = [
 
 
 # 加一个建议的表单
-# 添加微信公众号的信息来源

@@ -27,7 +27,6 @@ load_dotenv()
 # ============================================================
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 FEISHU_WEBHOOK   = os.environ["FEISHU_WEBHOOK"]
-DB_PATH          = "newsletter.db"
 LOOKBACK_HOURS   = 12          # 抓取过去多少小时的内容
 PUSH_HOURS       = [9, 21]     # 每天推送时间（24小时制），可添加多个
 MAX_PER_SECTION = 10  # 每板块最多渲染条数（控制飞书卡片30KB限制）
@@ -100,37 +99,6 @@ def passes_filter(text: str) -> bool: # notice, 如果用llm判定成本会高
     text_lower = text.lower()
     return any(kw.lower() in text_lower for kw in KEYWORDS)
 
-# ============================================================
-# 数据库
-# ============================================================
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS seen_items (
-            hash TEXT PRIMARY KEY,
-            title TEXT,
-            url TEXT,
-            source TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    return conn
-
-def is_seen(conn, url: str) -> bool:
-    h = hashlib.md5(url.encode()).hexdigest()
-    return conn.execute("SELECT 1 FROM seen_items WHERE hash=?", (h,)).fetchone() is not None
-
-def mark_seen(conn, url: str, title: str, source: str):
-    h = hashlib.md5(url.encode()).hexdigest()
-    conn.execute("INSERT OR IGNORE INTO seen_items(hash,title,url,source) VALUES(?,?,?,?)",
-                 (h, title, url, source))
-    conn.commit()
-
-def cleanup_old(conn):
-    """清理7天前的记录"""
-    conn.execute("DELETE FROM seen_items WHERE created_at < datetime('now','-7 days')")
-    conn.commit()
 
 # ============================================================
 # 内容抓取
@@ -153,19 +121,28 @@ def fetch_rss(source: dict, since: datetime) -> tuple[list[dict], int]:
 
             title   = getattr(entry, "title", "")
             link    = getattr(entry, "link", "")
-            summary = getattr(entry, "summary", "")
             raw += 1
 
-            if not passes_filter(f"{title} {summary}"):
-                continue
+            # prefer full content over summary
+            if hasattr(entry, "content") and entry.content:
+                raw_summary = entry.content[0].get("value", "")
+            else:
+                raw_summary = getattr(entry, "summary", "")
+
+            try:
+                from bs4 import BeautifulSoup as _BS
+                summary = _BS(raw_summary, "html.parser").get_text(" ", strip=True)
+            except Exception:
+                summary = raw_summary
 
             items.append({
-                "title":    title,
-                "url":      link,
-                "summary":  summary[:500],
-                "source":   source["name"],
-                "category": source["category"],
-                "pub_time": pub.strftime("%m-%d %H:%M") if pub else "",
+                "title":       title,
+                "url":         link,
+                "summary":     summary,
+                "source":      source["name"],
+                "category":    source["category"],
+                "pub_time":    pub.strftime("%m-%d %H:%M") if pub else "",
+                "source_type": "rss",
             })
     except Exception as e:
         log.warning(f"RSS抓取失败 {source['name']}: {e}")
@@ -175,35 +152,47 @@ def fetch_rss(source: dict, since: datetime) -> tuple[list[dict], int]:
 def _extract_nearby_time(tag) -> Optional[datetime]:
     """Try to find a pub date near an <a> tag: check <time> in parent/siblings."""
     import re
-    # Walk up a few levels looking for a <time datetime="...">
-    node = tag.parent
-    for _ in range(4):
-        if node is None:
-            break
-        t = node.find("time")
-        if t and t.get("datetime"):
-            try:
-                dt_str = t["datetime"][:19]  # trim timezone/ms
-                return datetime.fromisoformat(dt_str)
-            except Exception:
-                pass
-        node = node.parent
 
-    # Fallback: scan surrounding text for date patterns like "Mar 29, 2026" or "2026-03-29"
-    container = tag.parent
-    if container:
-        text = container.get_text(" ", strip=True)
-        for pat, fmt in [
-            (r"\b(\d{4}-\d{2}-\d{2})\b", "%Y-%m-%d"),
-            (r"\b([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})\b", "%b %d, %Y"),
-            (r"\b([A-Z][a-z]{2}\d{1,2},\s+\d{4})\b", "%b%d, %Y"),
-        ]:
+    DATE_PATTERNS = [
+        (r"\b(\d{4}-\d{2}-\d{2})\b",                    "%Y-%m-%d"),
+        (r"\b([A-Z][a-z]+ \d{1,2},\s+\d{4})\b",         "%B %d, %Y"),   # April 13, 2026
+        (r"\b([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})\b",     "%b %d, %Y"),   # Apr 13, 2026
+        (r"\b([A-Z][a-z]{2}\d{1,2},\s+\d{4})\b",         "%b%d, %Y"),
+    ]
+
+    def _try_parse(text):
+        for pat, fmt in DATE_PATTERNS:
             m = re.search(pat, text)
             if m:
                 try:
                     return datetime.strptime(m.group(1), fmt)
                 except Exception:
                     pass
+        return None
+
+    # 1. Walk up looking for <time datetime="...">
+    node = tag.parent
+    for _ in range(6):
+        if node is None:
+            break
+        t = node.find("time")
+        if t and t.get("datetime"):
+            try:
+                return datetime.fromisoformat(t["datetime"][:19])
+            except Exception:
+                pass
+        node = node.parent
+
+    # 2. Walk up scanning text of each ancestor (catches sibling <p> with date)
+    node = tag.parent
+    for _ in range(6):
+        if node is None:
+            break
+        result = _try_parse(node.get_text(" ", strip=True))
+        if result:
+            return result
+        node = node.parent
+
     return None
 
 
@@ -219,30 +208,52 @@ def fetch_webpage(source: dict, since: Optional[datetime] = None) -> tuple[list[
         from urllib.parse import urljoin
         resp = requests.get(source["url"], timeout=10, headers={"User-Agent": "Mozilla/5.0"})
         soup = BeautifulSoup(resp.text, "html.parser")
-        for a in soup.find_all("a", href=True)[:3]:
+        NAV_KEYWORDS = {"pricing", "login", "signup", "sign-up", "register", "contact",
+                        "about", "careers", "terms", "privacy", "faq", "help", "home",
+                        "features", "api", "docs", "explore", "tag", "category"}
+        seen_hrefs = set()
+        for a in soup.find_all("a", href=True)[:200]:
             title = a.get_text(strip=True)
             href  = a["href"]
             if not href.startswith("http"):
                 href = urljoin(source["url"], href)
             if len(title) <= 15:
                 continue
+            # skip nav/utility links
+            href_lower = href.lower()
+            if any(kw in href_lower for kw in NAV_KEYWORDS):
+                continue
+            if href in seen_hrefs:
+                continue
+            seen_hrefs.add(href)
             raw += 1
 
-            pub_time = None
-            if since:
-                pub_time = _extract_nearby_time(a)
-                if pub_time and pub_time < since:
-                    continue  # too old, skip
+            pub_time = _extract_nearby_time(a)
+            if not pub_time:
+                continue  # no date = likely not an article
+            if since and pub_time < since:
+                continue  # too old, skip
 
-            if passes_filter(title):
-                items.append({
-                    "title":    title,
-                    "url":      href,
-                    "summary":  "",
-                    "source":   source["name"],
-                    "category": source["category"],
-                    "pub_time": pub_time.strftime("%m-%d %H:%M") if pub_time else "",
-                })
+            # 抓取文章正文
+            body = ""
+            try:
+                article_resp = requests.get(href, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+                article_soup = BeautifulSoup(article_resp.text, "html.parser")
+                for tag in article_soup(["script", "style", "nav", "footer", "header"]):
+                    tag.decompose()
+                body = article_soup.get_text(" ", strip=True)
+            except Exception:
+                pass
+
+            items.append({
+                "title":       title,
+                "url":         href,
+                "summary":     body,
+                "source":      source["name"],
+                "category":    source["category"],
+                "pub_time":    pub_time.strftime("%m-%d %H:%M"),
+                "source_type": "webpage",
+            })
     except Exception as e:
         log.warning(f"网页抓取失败 {source['name']}: {e}")
     return items, raw
@@ -258,7 +269,9 @@ def fetch_twitter(since: datetime) -> list[dict]:
     since_str = since.strftime("%Y-%m-%dT%H:%M:%SZ")
     items = []
 
-    for username, display_name in TWITTER_ACCOUNTS.items():
+    for username, meta in TWITTER_ACCOUNTS.items():
+        display_name = meta["name"]
+        category     = meta["category"]
         try:
             # Resolve username -> user ID
             resp = requests.get(
@@ -281,14 +294,17 @@ def fetch_twitter(since: datetime) -> list[dict]:
             )
             tweets = resp.json().get("data", [])
             for tweet in tweets:
+                import re as _re
+                clean_text = _re.sub(r'https://t\.co/\S+', '', tweet["text"]).strip()
                 url = f"https://x.com/{username}/status/{tweet['id']}"
                 items.append({
-                    "title":    f"[{display_name}] {tweet['text'][:100]}",
-                    "url":      url,
-                    "summary":  tweet["text"][:500],
-                    "source":   display_name,
-                    "category": "opinion",
-                    "pub_time": tweet.get("created_at", "")[:16].replace("T", " "),
+                    "title":       clean_text[:100],
+                    "url":         url,
+                    "summary":     clean_text,
+                    "source":      display_name,
+                    "category":    category,
+                    "pub_time":    tweet.get("created_at", "")[:16].replace("T", " "),
+                    "source_type": "twitter",
                 })
             time.sleep(1)  # rate limit buffer
         except Exception as e:
@@ -297,42 +313,36 @@ def fetch_twitter(since: datetime) -> list[dict]:
     return items
 
 
-def collect_all(conn: sqlite3.Connection) -> list[dict]:
+def collect_all() -> list[dict]:
     since = datetime.utcnow() - timedelta(hours=LOOKBACK_HOURS)
     all_items = []
     total_raw = 0
-    total_filtered = 0
 
     log.info("开始抓取RSS源...")
     for src in RSS_SOURCES:
         fetched, raw = fetch_rss(src, since)
-        new_items = [i for i in fetched if not is_seen(conn, i["url"])]
-        all_items.extend(new_items)
+        all_items.extend(fetched)
         total_raw += raw
-        total_filtered += len(fetched)
-        log.info(f"  {src['name']}: {len(new_items)}条新内容 (窗口内{raw}条, 过滤后{len(fetched)}条)")
+        log.info(f"  {src['name']}: {len(fetched)}条")
         time.sleep(0.5)
 
-    # log.info("开始抓取博客页面...") # 暂时停用
-    # for src in SCRAPE_SOURCES:
-    #     fetched, raw = fetch_webpage(src, since=since)
-    #     new_items = [i for i in fetched if not is_seen(conn, i["url"])]
-    #     all_items.extend(new_items)
-    #     total_raw += raw
-    #     total_filtered += len(fetched)
-    #     log.info(f"  {src['name']}: {len(new_items)}条新内容 (抓取{raw}条, 过滤后{len(fetched)}条)")
-    #     time.sleep(0.5)
+    log.info("开始抓取博客页面...")
+    for src in SCRAPE_SOURCES:
+        fetched, raw = fetch_webpage(src, since=since)
+        all_items.extend(fetched)
+        total_raw += raw
+        log.info(f"  {src['name']}: {len(fetched)}条")
+        time.sleep(0.5)
 
-    log.info("开始抓取Twitter...")
-    twitter_items = [i for i in fetch_twitter(since) if not is_seen(conn, i["url"])]
-    all_items.extend(twitter_items)
-    log.info(f"  Twitter: {len(twitter_items)}条新内容")
+    # log.info("开始抓取Twitter...")
+    # twitter_items = fetch_twitter(since)
+    # all_items.extend(twitter_items)
+    # log.info(f"  Twitter: {len(twitter_items)}条")
 
     print(f"\n{'='*40}")
-    print(f"关键词过滤统计：原始 {total_raw} 条 → 过滤后 {total_filtered} 条 (保留 {total_filtered/total_raw*100:.1f}%)" if total_raw else "无内容")
-    print(f"去重后送入AI：{len(all_items)} 条")
+    print(f"共采集到 {len(all_items)} 条")
     print(f"{'='*40}\n")
-    log.info(f"共采集到 {len(all_items)} 条新内容")
+    log.info(f"共采集到 {len(all_items)} 条")
     return all_items
 
 # ============================================================
@@ -344,8 +354,9 @@ SECTION_MAP = {
     "biz":      "💼 应用层追踪", # creative, social
     "media":     "📰 媒体", # media, tech, public market
     "funding":  "💰 一级市场", # funding
-    "public_market": "📈 二级市场",
+
     "opinion":  "💡 高质量观点", # opinion
+        # "public_market": "📈 二级市场",
 }
 
 # 将信源 category 归并到推送 section
@@ -373,103 +384,8 @@ SECTION_LOG_ORDER = [
     ("opinions",      "💡 高质量观点"),
 ]
 
-def ai_summarize(items: list[dict]) -> dict:
-    """
-    Step 1 (code): bucket items by category using CATEGORY_TO_SECTION.
-    Step 2 (LLM):  summarize and rate importance.
-    Logs full item list before truncating to MAX_PER_SECTION per section.
-    """
-    if not items:
-        return {}
-
-    # ── Step 1: bucket by category ──────────────────────────
-    sections: dict[str, list[dict]] = {k: [] for k in CATEGORY_TO_SECTION.values()}
-    for item in items:
-        section = CATEGORY_TO_SECTION.get(item["category"])
-        if section:
-            sections[section].append(item)
-
-    # ── Step 2: LLM — per-section, smaller batches ──────────
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
-    def _llm_enrich(sec_items: list[dict]) -> list[dict]:
-        if not sec_items:
-            return []
-        payload = json.dumps(
-            [{"idx": i+1, "source": item["source"], "title": item["title"],
-              "summary": item.get("summary", "")[:150], "url": item["url"]}
-             for i, item in enumerate(sec_items)],
-            ensure_ascii=False
-        )
-        prompt = f"""你是AI资讯编辑。对以下每条资讯输出完整JSON条目，顺序与输入一致，不增不减。
-
-{payload}
-
-输出JSON数组：
-[{{"idx":1,"title":"中文标题","summary":"一句话中文摘要（30字内）","source":"原来源名","url":"原链接","importance":3}}]
-要求：
-- title如果是英文请翻译成中文（model类标题保留英文）
-- summary必须中文，30字内
-- importance 5=重大突破，1=一般动态
-只输出JSON。"""
-        try:
-            msg = client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=4000,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            text = msg.content[0].text
-            log.info(f"  LLM原始返回:\n{text}")
-            import re as _re
-            m = _re.search(r'\[.*\]', text, _re.DOTALL)
-            if not m:
-                raise ValueError("LLM返回中未找到JSON数组")
-            result = json.loads(m.group(0))
-            log.info(f"  LLM: 输入{len(sec_items)}条 → 输出{len(result)}条")
-            return result
-        except Exception as e:
-            log.error(f"LLM处理失败: {e}")
-            return []
-
-    for key in sections:
-        enriched = _llm_enrich(sections[key])
-        if not enriched:
-            log.warning(f"LLM enrichment failed for section '{key}', skipping section")
-            sections[key] = []
-            continue
-        idx_map = {e.get("idx", i+1): e for i, e in enumerate(enriched)}
-        for i, item in enumerate(sections[key]):
-            e = idx_map.get(i+1, {})
-            item["title"]      = e.get("title") or item["title"]
-            item["summary"]    = (e.get("summary") or "")[:40]
-            item["source"]     = e.get("source") or item["source"]
-            item["importance"] = e.get("importance", 3)
-
-    # ── Sort sections by importance ──────────────────────────
-    for key in sections:
-        sections[key].sort(key=lambda x: x.get("importance", 3), reverse=True)
-
-    # ── Log full list before truncation (JSON) ──────────────
-    all_sections_json = {
-        key: [
-            {"importance": item.get("importance", 3), 
-             "title": item["title"],
-             "summary": item["summary"], 
-             "source": item["source"], 
-             "url": item["url"]}
-            for item in sections.get(key, [])
-        ]
-        for key, _ in SECTION_LOG_ORDER
-    }
-    log.info("── 全量资讯（渲染前，JSON格式）──\n" + json.dumps(all_sections_json, ensure_ascii=False, indent=2))
-
-    # ── Truncate to MAX_PER_SECTION for card ────────────────
-    for key in sections:
-        sections[key] = sections[key][:MAX_PER_SECTION]
-
-    return sections
-
-from utils import fetch_stock_data, build_stock_elements
+from utils import fetch_stock_data
+from feishu_bitable import write_items_to_bitable
 
 
 # ============================================================
@@ -576,39 +492,6 @@ def send_text_to_feishu(text: str) -> bool:
 # ============================================================
 # 主流程
 # ============================================================
-def run_once():
-    log.info("=" * 50)
-    log.info(f"开始执行资讯推送任务 {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    
-    conn = init_db()
-    cleanup_old(conn)
-
-    # 1. 采集
-    items = collect_all(conn)
-    
-    if not items:
-        log.info("没有新内容，跳过推送")
-        return
-
-    # 2. AI分析
-    log.info("调用Claude进行智能分析...")
-    sections = ai_summarize(items)
-
-    # 3. 标记已读
-    for item in items:
-        mark_seen(conn, item["url"], item["title"], item["source"])
-
-    # 4. 构建并发送
-    date_str = datetime.now().strftime("%Y年%m月%d日")
-    
-    if sections:
-        card = build_feishu_card(sections, date_str)
-        send_to_feishu(card)
-    else:
-        send_text_to_feishu(f"⚠️ AI日报 {date_str}：内容处理异常，请检查日志")
-
-    conn.close()
-    log.info("任务完成")
 
 
 def run_scheduler():
@@ -633,40 +516,24 @@ def test_source(url: str, scrape: bool = False):
         print()
 
 
-CACHE_FILE = "debug_items.json"
 
-def run_debug():
-    """Debug mode: reuse cached items from debug_items.json if it exists, skipping crawl."""
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, encoding="utf-8") as f:
-            items = json.load(f)
-        print(f"[debug] loaded {len(items)} items from cache")
-    else:
-        conn = init_db()
-        items = collect_all(conn)
-        conn.close()
-        with open(CACHE_FILE, "w", encoding="utf-8") as f:
-            json.dump(items, f, ensure_ascii=False, indent=2)
-        print(f"[debug] crawled and saved {len(items)} items to {CACHE_FILE}")
-
-    date_str = datetime.now().strftime("%Y年%m月%d日")
-    sections = ai_summarize(items)
-    if sections:
-        card = build_feishu_card(sections, date_str)
-        send_to_feishu(card)
+def run_collect():
+    """只采集+写入多维表格，跳过AI分析和飞书卡片推送。"""
+    log.info("=" * 50)
+    log.info(f"采集模式启动 {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    items = collect_all()
+    if not items:
+        log.info("没有新内容")
+        return
+    write_items_to_bitable(items)
+    log.info("采集完成")
 
 
 if __name__ == "__main__":
     import sys
     args = sys.argv[1:]
-    if args and args[0] == "--now":
-        run_once()
-    elif args and args[0] == "--debug":
-        run_debug()
-    elif args and args[0] == "--debug-reset":
-        if os.path.exists(CACHE_FILE):
-            os.remove(CACHE_FILE)
-        run_debug()
+    if args and args[0] == "--collect":
+        run_collect()
     elif args and args[0] == "--test" and len(args) >= 2:
         test_source(args[1], scrape="--scrape" in args)
     else:
