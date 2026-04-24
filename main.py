@@ -27,8 +27,7 @@ load_dotenv()
 # ============================================================
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 FEISHU_WEBHOOK   = os.environ["FEISHU_WEBHOOK"]
-LOOKBACK_HOURS   = 12          # 抓取过去多少小时的内容
-PUSH_HOURS       = [9, 21]     # 每天推送时间（24小时制），可添加多个
+LOOKBACK_HOURS   = 24          # 抓取过去多少小时的内容
 MAX_PER_SECTION = 10  # 每板块最多渲染条数（控制飞书卡片30KB限制）
 
 os.makedirs("logs", exist_ok=True)
@@ -524,9 +523,11 @@ def run_collect():
     items = collect_all()
     if not items:
         log.info("没有新内容")
+        send_text_to_feishu(f"[AI采集] {datetime.now().strftime('%Y-%m-%d %H:%M')} 完成，无新内容")
         return
     write_items_to_bitable(items)
     log.info("采集完成")
+    send_text_to_feishu(f"[AI采集] {datetime.now().strftime('%Y-%m-%d %H:%M')} 完成，共采集 {len(items)} 条")
 
 
 if __name__ == "__main__":

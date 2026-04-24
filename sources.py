@@ -187,5 +187,3 @@ WECHAT_ACCOUNTS = [
     {"name": "语言即世界", "biz": "MzE5ODg1MTY4Mw=="},
 ]
 
-
-# 加一个建议的表单
